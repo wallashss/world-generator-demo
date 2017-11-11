@@ -1,0 +1,3 @@
+[submodule "obj-webgl-viewer"]
+	path = obj-webgl-viewer
+	url = https://github.com/wallashss/obj-webgl-viewer.git
