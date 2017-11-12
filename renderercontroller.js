@@ -32,20 +32,16 @@ function initRenderer()
 		renderer.draw(dt);
 	});	
 	
-
-	// Scene Controller
-	let sceneController = new SceneController();
 	
 	let goToCenter = function()	
 	{
-		let size =  sceneController.getSize();
-		let center = sceneController.getCenter();
-		let eye = vec3.fromValues(center[0], center[1], center[2] - size[2] - 1);
+		let eye = vec3.fromValues(0, 0, 2);
+		let center = vec3.fromValues(0, 0, 0);
 		let up = vec3.fromValues(0.0, 1.0, 0.0);
 
-		cameraController.setVelocity(Math.min(Math.min(size[0], size[1]), size[2]));
 		cameraController.setCamera(eye, center, up);
 	}
+	goToCenter();
 	window.addEventListener("keypress", function(e)
 	{
 		if(e.key === "E" || e.key === "e")
