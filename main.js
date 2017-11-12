@@ -173,6 +173,7 @@ function update()
     //Noise
     let imgData = ctx.createImageData(w, h);
 
+    // let noiseData = new Array(w*h);
     let noiseData = perlinNoiseMaker.getNoiseData(w, h, false, seed, octaves);
 
     ctx.putImageData(imgData,0,0);

@@ -18,17 +18,27 @@ function PerlinNoise()
         // This number will "guarantee" no repetition for our (x,y)
         // nth prime reference: https://primes.utm.edu/nthprime/index.php#nth
         let n = x * 8161 + y;
-        n = parseFloat(n);
         n = (n<<5) ^ n;
         return ( 1.0 - parseFloat((((n * (n * n * 3 + 48611) + 23) & 0x7fffffff) / 38609.0)));
     }
 
-    function smoothNoise(x, y)
+    function noise3D(x, y, z)
     {
-        let corners = ( noise2D(x - 1, y - 1) + noise2D(x + 1, y - 1) + noise2D(x - 1, y + 1)+noise2D(x+1, y+1) ) / 16;
-        let sides   = ( noise2D(x - 1, y)  +noise2D(x + 1, y)  +noise2D(x, y - 1)  +noise2D(x, y +1) ) /  8;
-        let center  =  noise2D(x, y) / 4;
-        return corners + sides + center;
+        // 8161 is the 1024nth prime, 1024 x 1024 is the limit for our texture.
+        // This number will "guarantee" no repetition for our (x,y)
+        // nth prime reference: https://primes.utm.edu/nthprime/index.php#nth
+        let n = x * 3671 + y * 8161 + z;
+        n = (n<<5) ^ n;
+        return ( 1.0 - parseFloat((((n * (n * n * 3 + 48611) + 23) & 0x7fffffff) / 38609.0)));
+    }
+
+    function smoothNoise(x, y, z)
+    {
+        let sides = noise3D(x, y + 1, z) + noise3D(x + 1, y, z) + noise3D(x - 1, y, z) + noise3D(x, y -1, z) +
+                    noise3D(x, y , z + 1) + noise3D(x, y , z - 1);
+        let center = noise3D(x, y, z);
+
+        return center / 3  + (sides * 2) / 3;
     }
 
     function interpolate(x, y, a)
@@ -36,26 +46,37 @@ function PerlinNoise()
         return x*(1-a) + y*a;
     }
 
-    function interpolatedNoise(x, y)
+    function interpolatedNoise(x, y, z)
     {
         let fractional_X = x - Math.floor(x);
-
         let fractional_Y = y - Math.floor(y);
+        let fractional_Z = z - Math.floor(z);
 
-        let v1 = smoothNoise(parseInt(Math.floor(x)), parseInt(Math.floor(y)));
-        let v2 = smoothNoise(parseInt(Math.floor(x))+ 1,  parseInt(Math.floor(y)));
-        let v3 = smoothNoise(parseInt(Math.floor(x)), parseInt(Math.floor(y)) + 1);
-        let v4 = smoothNoise(parseInt(Math.floor(x)) + 1, parseInt(Math.floor(y)) + 1);
+        let v1 = smoothNoise(parseInt(Math.floor(x)), parseInt(Math.floor(y)), parseInt(Math.floor(z)));
+        let v2 = smoothNoise(parseInt(Math.floor(x))+ 1,  parseInt(Math.floor(y)), parseInt(Math.floor(z)));
+        let v3 = smoothNoise(parseInt(Math.floor(x)), parseInt(Math.floor(y)) + 1, parseInt(Math.floor(z)));
+        let v4 = smoothNoise(parseInt(Math.floor(x)) + 1, parseInt(Math.floor(y)) + 1, parseInt(Math.floor(z)));
+
+        let v5 = smoothNoise(parseInt(Math.floor(x)), parseInt(Math.floor(y)), parseInt(Math.floor(z)+ 1));
+        let v6 = smoothNoise(parseInt(Math.floor(x))+ 1,  parseInt(Math.floor(y)), parseInt(Math.floor(z)+ 1));
+        let v7 = smoothNoise(parseInt(Math.floor(x)), parseInt(Math.floor(y)) + 1, parseInt(Math.floor(z)+ 1));
+        let v8 = smoothNoise(parseInt(Math.floor(x)) + 1, parseInt(Math.floor(y)) + 1, parseInt(Math.floor(z)+ 1));
 
         let i1 = interpolate(v1, v2, fractional_X);
         let i2 = interpolate(v3, v4, fractional_X);
 
-        return interpolate(i1 , i2 , fractional_Y);
+        let i3 = interpolate(v5, v6, fractional_X);
+        let i4 = interpolate(v7, v8, fractional_X);
+
+        let i5 = interpolate(i1 , i2 , fractional_Y);
+        let i6 = interpolate(i3 , i4 , fractional_Y);
+        return interpolate(i5 , i6 , fractional_Z);
+        // return i5;
     }
 
-    function getOctave(x, y, frequency, amplitude)
+    function getOctave(x, y, z, frequency, amplitude)
     {
-        return interpolatedNoise(x * frequency, y * frequency) * amplitude;
+        return interpolatedNoise(x * frequency, y * frequency, z * frequency) * amplitude;
     }
 
     this.getNoiseData = function(w, h, setAlpha, seed, octaves)
@@ -73,6 +94,8 @@ function PerlinNoise()
             octavesParams.push({frequency: frequency, amplitude: amplitude});
         }
 
+        let iw = 1 / w ;
+        let ih = 1 / h;
         for(let i =0 ; i < w; i++)
         {
             for(let j =0; j < h ; j++)
@@ -81,8 +104,15 @@ function PerlinNoise()
                 for(let k = 0; k < octavesParams.length; k++)
                 {    
                     let octave = octavesParams[k];
-                    v += getOctave((parseFloat(i) + seed.offsety) * seed.scalex, 
-                                    (parseFloat(j) + seed.offsetx) * seed.scaley, 
+
+                    let pos = getSphereCoordinate(i * iw, j * ih);
+
+                    let x = (pos.x+1) * 0.5 * w ;
+                    let y = (pos.y+1) * 0.5 * h ;
+                    let z = (pos.z+1) * 0.5 * h ;
+                    v += getOctave((x + seed.offsety) * seed.scalex, 
+                                    (y + seed.offsetx) * seed.scaley,
+                                    (z + seed.offsetx) * seed.scaley, 
                                     octave.frequency, octave.amplitude);
                 }
                 allValues[i*h+j] = v;
@@ -124,5 +154,7 @@ function PerlinNoise()
             }
         }
     }
+
+    this.getSphericalNoise
     
 }

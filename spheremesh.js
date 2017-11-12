@@ -101,7 +101,20 @@ function generateSphereMesh(resolution)
     }
 
     return sphere;
+}
 
+function getSphereCoordinate(x, y)
+{
 
+    let u = (x - 0.5) * 2.0; // radius = 1.0f
+    let teta = y * 2.0 * Math.PI;
 
+    let u2 = u * u;
+
+    let vertex = {x: 0, y: 0, z: 0};
+    vertex.x = Math.sqrt(1.0 - u2) * Math.cos(teta) * 0.5;
+    vertex.y = Math.sqrt(1.0 - u2) * Math.sin(teta) * 0.5;
+    vertex.z = u * 0.5;
+
+    return vertex;
 }

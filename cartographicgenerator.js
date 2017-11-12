@@ -13,21 +13,10 @@ function CarthographicGenerator()
             colorRgbs.push(hexToRgb(colors[i]));
         }
 
-        let marginPercent = 0.03;
-
-        let marginPixel = marginPercent * w;
-        let inverseMargin = 1/(marginPercent*2)
-        console.log(marginPixel);
-        // console.log(colorRgbs);
         for(let i =0 ; i < w ; i++)
         {
             for(let j =0 ; j < h ; j++)
             {
-                // let v = noiseData[ i*h +j];
-                
-                // let pixel = colorRgbs[0];
-
-
                 let noise = noiseData[ i*h +j];
                 let getPixel = ( v) =>
                 {
@@ -65,6 +54,12 @@ function CarthographicGenerator()
                 img.data[i*h*4 + j*4 + 1] = pixel.g;
                 img.data[i*h*4 + j*4 + 2] = pixel.b;
                 img.data[i*h*4 + j*4 + 3] = 255;
+
+                // let pos = getSphereCoordinate((i / w), (j / h));
+                // img.data[i*h*4 + j*4 + 0] = pos.x * 255;
+                // img.data[i*h*4 + j*4 + 1] = pos.y * 255;
+                // img.data[i*h*4 + j*4 + 2] = pos.z * 255;
+                // img.data[i*h*4 + j*4 + 3] = 255;
                 
             }
         }
