@@ -21,7 +21,7 @@ function initRenderer()
 	let fragmentSource = fragmentScript.childNodes[0].nodeValue;
 	
 	renderer = new Renderer();
-	renderer.setBackgroundColor(0, 0, 0);
+	renderer.setBackgroundColor(0, 0, 0, 1);
 	renderer.load(canvas, vertexSource, fragmentSource);
 
 	// Initialize cameracontroller
@@ -72,54 +72,4 @@ function initRenderer()
 	{
 		renderer.addTexture("default", img);
 	}
-	// renderer.addObject( [
-	// 		 1.0,  0.0,  0.0, 	0.0, 0.0, -1.0,		0.0, 0.0,
-	// 		 0.0, 1.0,  0.0,	0.0, 0.0, -1.0,		0.0, 0.0,
-	// 		 0.0, 0.0,  0.0,	0.0, 0.0, -1.0,		0.0, 0.0
-	// 	], [0, 1, 2]);
-	// Init obj uploader
-	
-
-	// Upload texture
-	// let imgUploader = document.getElementById("img_file");
-	
-	// imgUploader.addEventListener("change", function(e)
-	// {
-	// 	let files = e.target.files;
-	// 	let file = files[0];		
-	// 	let reader = new FileReader();
-		
-	// 	reader.onload = function(e)
-	// 	{
-	// 		let img = new Image();
-	// 		img.width = "150";
-	// 		img.height = "150";
-	// 		img.src = e.target.result;
-			
-	// 		img.onload = function(e)
-	// 		{
-	// 			renderer.addTexture("default", img);
-	// 			viewController.appendChild(img);
-	// 		}
-	// 		// let obj = objreader.readObjects(e.target.result);
-	// 	};
-		
-	// 	reader.readAsDataURL(file);
-	// });
-	
-	// let button = document.getElementById("animate_button");
-// 	button.addEventListener("click", function()
-// 	{
-// 		// UGLIEST EVER =D
-// 		if(button.value == "Start")
-// 		{
-// 			button.value = "Stop";
-// 			renderer.startAnimation();
-// 		}
-// 		else
-// 		{
-// 			button.value = "Start"; // =DDDDD
-// 			renderer.stopAnimation();
-// 		}
-// 	});
 }
