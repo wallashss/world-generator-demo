@@ -63,7 +63,7 @@ function initRenderer()
 		}
 	});
 
-	let planetmesh = generateSphereMesh(16);
+	let planetmesh = generateSphereMesh(128);
 
 	renderer.addObject(planetmesh.vertices, planetmesh.elements, [1, 1, 1, 1], "default");
 

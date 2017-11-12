@@ -13,38 +13,58 @@ function CarthographicGenerator()
             colorRgbs.push(hexToRgb(colors[i]));
         }
 
+        let marginPercent = 0.03;
+
+        let marginPixel = marginPercent * w;
+        let inverseMargin = 1/(marginPercent*2)
+        console.log(marginPixel);
         // console.log(colorRgbs);
         for(let i =0 ; i < w ; i++)
         {
             for(let j =0 ; j < h ; j++)
             {
-                let v = noiseData[ i*h +j];
+                // let v = noiseData[ i*h +j];
                 
-                let pixel = colorRgbs[0];
-                for(let k = thresholds.length - 1; k >= 0; k--)
+                // let pixel = colorRgbs[0];
+
+
+                let noise = noiseData[ i*h +j];
+                let getPixel = ( v) =>
                 {
-                    let t = thresholds[k];
-
-                    if(v >= t)
+                    let pixel = colorRgbs[0];
+                    
+                    for(let k = thresholds.length - 1; k >= 0; k--)
                     {
-                        pixel = colorRgbs[k+1];
-                        break;
-                    }               
+                        let t = thresholds[k];
+    
+                        if(v >= t)
+                        {
+                            pixel = colorRgbs[k+1];
+                            break;
+                        }               
+                    }
+                    v = v*1.5 + 0.25; // Add a gain
+                    v = v > 1.0 ? 1.0 : v;
+
+                    return {r: pixel.r * v, g: pixel.g * v, b: pixel.b * v};
                 }
-
-                v = v*1.5 + 0.25; // Add a gain
-                v = v > 1.0 ? 1.0 : v;
-
-                img.data[i*h*4 + j*4 + 0] = pixel.r * v;
-                img.data[i*h*4 + j*4 + 1] = pixel.g * v;
-                img.data[i*h*4 + j*4 + 2] = pixel.b * v;
-                img.data[i*h*4 + j*4 + 3] = 255;
-
-                // img.data[i*h*4 + j*4 + 0] = (i / w) * 255;
-                // img.data[i*h*4 + j*4 + 1] = (j / h) * 255;
-                // img.data[i*h*4 + j*4 + 2] = 0;
-                // img.data[i*h*4 + j*4 + 3] = 255;
                 
+                let pixel = getPixel( noise);
+
+                // v = v*1.5 + 0.25; // Add a gain
+                // v = v > 1.0 ? 1.0 : v;
+
+                // let r = noise * 255;
+                // let g = noise * 255;
+                // let b = noise * 255;
+                // pixel.r = noise * 255;
+                // pixel.g = noise * 255;
+                // pixel.b = noise * 255;
+
+                img.data[i*h*4 + j*4 + 0] = pixel.r;
+                img.data[i*h*4 + j*4 + 1] = pixel.g;
+                img.data[i*h*4 + j*4 + 2] = pixel.b;
+                img.data[i*h*4 + j*4 + 3] = 255;
                 
             }
         }
