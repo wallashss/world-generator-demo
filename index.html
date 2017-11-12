@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>World Generator</title>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta charset="utf-8" />
+		<script type="text/javascript" src="utils.js" ></script>
+		<script type="text/javascript" src="perlinnoise.js" ></script>
+		<script type="text/javascript" src="cartographicgenerator.js" ></script>
+		<script type="text/javascript" src="main.js" ></script>
+		<script type="text/javascript" src="spheremesh.js" ></script>
+		<script type="text/javascript" src="renderercontroller.js" ></script>
+
+		<!--- renderer -->
+		<script type="text/javascript" src="obj-webgl-viewer/gl-matrix.js" ></script>
+		<script type="text/javascript" src="obj-webgl-viewer/meshutils.js" ></script>
+		<script type="text/javascript" src="obj-webgl-viewer/renderer.js" ></script>
+		<script type="text/javascript" src="obj-webgl-viewer/timer.js" ></script>
+		<script type="text/javascript" src="obj-webgl-viewer/cameracontroller.js" ></script>
+		<script type="text/javascript" src="obj-webgl-viewer/scenecontroller.js" ></script>
+		<script type="text/javascript" src="obj-webgl-viewer/lvrl/util.js" ></script>
+		<script type="text/javascript" src="obj-webgl-viewer/lvrl/examine.js" ></script>
+		<script type="text/javascript" src="obj-webgl-viewer/lvrl/fly.js" ></script>
+		<script id="vertex-shader" type="x-shader/x-fragment">
+			attribute vec3 position;
+			attribute vec3 normal;
+			attribute vec2 texcoord;
+			
+			uniform highp mat4 viewProjection;
+			uniform highp mat4 modelView;
+			uniform highp mat4 normalMatrix;
+			
+			uniform vec4 color;
+			
+			varying vec4 currentColor;
+			
+			varying vec3 vPosition;
+			varying vec3 vNormal;
+			varying vec2 vTexcoord;
+			
+			
+			void main (void)
+			{
+				gl_Position =  viewProjection * vec4(position, 1.0);
+				
+				currentColor = color;
+			
+				vTexcoord = texcoord;
+			
+				vec4 vPosition4 = modelView * vec4(position, 1.0);
+				vPosition = vPosition4.xyz / vPosition4.w;
+				
+				vNormal = mat3(normalMatrix) * normal;
+				vNormal = normalize(vNormal);
+			}
+		</script>
+		<script id="fragment-shader" type="x-shader/x-vertex">
+			precision mediump float;
+			varying vec4 currentColor;
+			varying vec3 vNormal;
+			varying vec2 vTexcoord;
+			varying vec3 vPosition;
+			uniform vec3 lightPosition;
+			uniform sampler2D texSampler;
+			uniform float useTexture;
+			uniform float unlit;
+			
+			void main(void)
+			{
+				if(unlit >0.0)
+				{
+					gl_FragColor = currentColor;
+				}
+				else
+				{
+					vec3 lightDir = normalize(lightPosition - vPosition);
+				
+					// Ambient
+					vec3 ambient = vec3(0.1);
+					float d = abs(dot(vNormal, lightDir));
+					
+					// Diffuse
+					vec3 diffuse = vec3(d);
+					
+					vec3 illumination = diffuse + ambient;
+					if(useTexture == 0.0)
+					{
+						gl_FragColor = vec4(illumination * currentColor.rgb, currentColor.a);
+					}
+					else
+					{
+						vec4 texel = texture2D(texSampler, vTexcoord);
+						gl_FragColor = vec4(illumination * currentColor.rgb * texel.rgb, currentColor.a);
+						// gl_FragColor = vec4(vTexcoord, 0, currentColor.a);
+					}
+				}
+				
+				
+			}
+		</script>
+		
+		<link type="text/css" rel="stylesheet" href="style.css"/>
+	</head>
+	<body>
+		<div id="main">
+			<canvas id="canvas" width="1024" height="1024"></canvas>
+			<canvas id="canvas-drawer" width="256" height="256"></canvas>
+			
+		</div>
+		<div id="view_controller">
+
+			<span>World Parameters</span>
+
+			<table id="world-param-table">
+				<tr>
+					<td>Base color</td>
+					<td><input id="first-color" type="color" value="#0000FF"></td>
+					<!-- <td><input id="first-threshold" class="threshold" type="number" value="0.3" step="0.001"></td> -->
+				</tr>
+
+				<tr>
+					<td>Primary color</td>
+					<td><input id="second-color" type="color" value="#f4b342"></td>
+					<td><input id="second-threshold" class="threshold" type="number" value="0.27" step="0.001"></td>
+				</tr>
+
+				<tr>
+					<td>Secondary color</td>
+					<td><input id="third-color" type="color" value="#28b731"></td>
+					<td><input id="third-threshold" class="threshold" type="number" value="0.3" step="0.001"></td>
+				</tr>
+			</table>
+
+			<span>Perlin noise</span>
+			<!-- Yes i will use table, it works! -->
+			<table>
+				<tr>
+					<td>Texture width</td>
+					<td><input id="texture-width-input" type="number" value="32"></td>
+				</tr>
+				<tr>
+					<td>Texture height</td>
+					<td><input id="texture-height-input" type="number" value="32"></td>
+				</tr>
+				<tr>
+					<td>Persistence</td>
+					<td><input id="persistence-input" type="number" value="0.5" step="0.01"></td>
+				</tr>	
+				<tr>
+					<td>Offset x</td>
+					<td><input id="offsetx-input" type="number" value="0" step="0.5"></td>
+				</tr>
+				<tr>
+					<td>Offset y</td>
+					<td><input id="offsety-input" type="number" value="0" step="0.5"></td>
+				</tr>
+				<tr>
+					<td>Scale x</td>
+					<td><input id="scalex-input" type="number" value="0.05" step="0.05"></td>
+				</tr>
+				<tr>
+					<td>Scale y</td>
+					<td><input id="scaley-input" type="number" value="0.05" step="0.05"></td>
+				</tr>
+				<tr>
+					<td>Octaves</td>
+					<td>
+						<input id="octave0-checkbox" type="checkbox" checked>0
+						<input id="octave1-checkbox" type="checkbox" checked>1
+						<input id="octave2-checkbox" type="checkbox" checked>2
+						<input id="octave3-checkbox" type="checkbox" checked>3
+					</td>
+				</tr>
+
+			</table>
+			<input type="button" id="randomize-colors-button" class="action-button" value="Randomize Colors" >
+			<input type="button" id="randomize-thresholds-button" class="action-button" value="Randomize Thresholds" >
+			<input type="button" id="randomize-noise-button" class="action-button" value="Randomize Noise" >
+			<input type="button" id="randomize-all-button" class="action-button" value="Randomize All" >
+			<input type="button" id="update-button" class="action-button" value="Update" >
+			
+		</div>
+		<div id="world-div">
+			<img id="world-texture"  >
+		</div>
+		
+	</body>
+</html>

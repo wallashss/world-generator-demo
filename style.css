@@ -1,0 +1,84 @@
+
+#main
+{
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	left: 0;
+	top: 0;
+	background: #666;
+}
+
+#root
+{
+	width: 750px;
+	height: 500px;
+	position: absolute;
+	left: calc(40% - 375px);
+	top: calc(50% - 250px);
+	box-sizing: border-box;
+}
+
+#canvas
+{
+	width: 100%;
+	height: 100%;
+	margin-bottom: 20px;
+	border: solid 1px black;
+	box-sizing: border-box;
+}
+
+#map
+{
+	width: 240px;
+	height: 240px;
+	position: absolute;
+	border: solid 1px black;
+	box-sizing: border-box;
+}
+
+#world-div
+{
+	position: fixed;
+	left: 10px;
+	background: #333;
+	padding: 10px;
+	width: 300px;
+	height: 300px;
+}
+
+#world-texture
+{
+	width: 100%;
+	height: 100%;
+}
+#view_controller
+{
+	position: fixed;
+	right: 10px;
+	top: 10px;
+	background: #333;
+	box-sizing: border-box;
+	padding: 10px;
+	color: #DDD;
+	border-radius: 2px;
+}
+
+#view_controller span
+{
+	display: block;
+	margin: 5px;
+}
+
+.action-button
+{
+	margin: 5px 0;
+	width: 100%;
+	display: block;
+}
+
+.threshold
+{
+	width: 50px;
+}
+
